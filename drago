@@ -1,0 +1,49 @@
+#!/bin/bash
+
+tag=drago
+container=drago
+
+function _main() {
+  case $1 in
+    stop)
+      docker rm -f ${container}
+      ;;
+    --client)
+      _auto_start
+      if [ $? -ne 0 ]
+      then
+        echo "Failed to start background instance"
+        exit 1
+      fi
+      docker exec --workdir "$(pwd)" ${container} idris "$@"
+      ;;
+    *)
+      if [ $# -eq 0 ]
+      then
+        flags="-it"
+      fi
+      docker run --rm -v $HOME:$HOME --workdir "$(pwd)" ${flags} ${tag} "${@}"
+      ;;
+  esac
+}
+
+function _auto_start() {
+  if [ -z "$(docker ps -qf name=${container})" ]
+  then
+    docker run --rm -id --network host -v $HOME:$HOME --name ${container} ${tag} \
+    > /dev/null
+    _retry docker exec ${container} idris --client 1 > /dev/null
+  fi
+}
+
+function _retry() {
+  "$@" && return 0
+  for i in $(seq 10)
+  do
+    sleep 1
+    "$@" && return 0
+  done
+  return 1
+}
+
+_main "$@"
