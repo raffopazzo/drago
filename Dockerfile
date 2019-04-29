@@ -3,7 +3,7 @@ ARG username
 ARG uid
 ARG gid
 
-RUN groupadd -f -g ${gid} drago \
+RUN groupadd -o -g ${gid} drago \
  && useradd -u ${uid} -g ${gid} -m ${username} \
  && chown -R ${username}:drago /root/.cabal \
  && chgrp drago /root \
