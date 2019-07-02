@@ -30,7 +30,7 @@ function _main() {
 function _auto_start() {
   if [ -z "$(docker ps -qf name=${container})" ]
   then
-    docker run --rm -id --network host -v $HOME:$HOME --name ${container} ${tag} \
+    docker run --rm -id --network host -v $HOME:$HOME --workdir "$(pwd)" --name ${container} ${tag} \
     > /dev/null
     _retry docker exec ${container} idris --client 1 > /dev/null
   fi
